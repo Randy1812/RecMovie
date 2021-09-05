@@ -16,10 +16,15 @@ body {
 }
 
 .logo-img {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  border-radius: 50px;
   margin-right: 20px;
+}
+
+.logo-img img {
+  object-fit:fill;
+  mix-blend-mode: multiply;
 }
 
 .navbar-custom {
@@ -29,9 +34,9 @@ body {
 a.nav-link:hover {
   transform: scale(1.15);
   border-bottom: 2px solid #fff;
-  padding-bottom: 1px;
-  /* transform:translateY(-2px); */
-  transition:all 0.35s ease-in;
+  padding-bottom: 5px;
+  transform:translateY(-2px);
+  transition:all 0.4s ease;
 }
 
 #hero {
@@ -186,9 +191,19 @@ h1.sign-heading {
   text-align: center;
 }
 
+img.big-pic {
+  border-radius: 20px;
+}
+
+.shadow {
+  border-radius: 20px;
+  box-shadow: 1px 1px 2px 200px rgba(0,0,0,0.95);
+}
+
 .info {
   margin-top: 60px;
   text-align: justify;
+  padding-right: 60px;
   /* font-size: 1.2rem; */
 }
 
@@ -208,7 +223,8 @@ h1.sign-heading {
 }
 
 .mtop {
-  margin-top: 80px;
+  margin-top: 180px;
+  padding-bottom: 40px;
 }
 
 .username {

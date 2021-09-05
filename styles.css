@@ -72,6 +72,15 @@ a.nav-link:hover {
   font-size: 24px;
 }
 
+input.get-started {
+  text-decoration: none;
+  color: white;
+  font-family: "Poppins", sans-serif;
+  font-size: 1.3rem;
+  font-weight: 500;
+}
+
+input.get-started,
 button.get-started {
   /* background-color: #b81d24; */
   text-transform: uppercase;
@@ -86,6 +95,7 @@ button.get-started {
   transition: all .4s ease-in-out;
 }
 
+input.get-started:hover,
 button.get-started:hover {
   /* background-color: #e50914; */
   color: #fff;

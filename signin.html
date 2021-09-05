@@ -8,24 +8,41 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
 
   <h1 class="sign-heading">SIGN IN</h1>
-  <div class="input">
-    <button class="ilab" type="button" name="button" disabled>Email</button>
-    <input class="ibox" type="email" name="email" placeholder="ex. you@example.com">
-  </div>
-  <div class="input">
-    <button class="ilab" type="button" name="button" disabled>Password</button>
-    <input class="ibox" type="password" name="pwd" placeholder="ex. johnDoe69$">
-  </div>
-  <div class="btn">
-    <button class="get-started" type="button" name="button"><a href="profile.html">Sign In</a></button>
-  </div>
+  <form action="profile.html" method="post">
+    <div class="input">
+      <button class="ilab" type="button" name="button" disabled data-bs-toggle="tooltip" data-bs-pacement="top" title="Must begin with alpha numeric characters, periods, underscores or hyphens.
+      There must be an @ symbol after the initial characters.
+      After the @ there must be alphanumeric characters (periods and underscores are allowed).
+      After this group of characters there must be a period.
+      It must end with 2 to 4 alphabets.">
+        Email
+      </button>
+      <input class="ibox" id="email" type="email" name="email" placeholder="ex. you@example.com" required>
+    </div>
+    <div class="input">
+      <button class="ilab" type="button" name="button" disabled data-bs-toggle="tooltip" data-bs-pacement="top" title="There must be a minimum of 8 characters.
+      There must be atleast 1 uppercase letter.
+      There must be atleast 1 lowercase letter.
+      There must be atleast 1 Special Character.
+      There must be atleast 1 Number.">
+        Password
+      </button>
+      <input class="ibox" id="password" type="password" name="pwd" placeholder="ex. johnDoe69$" required>
+    </div>
+    <div class="btn">
+      <!-- <button class="get-started" type="button" name="button"><a href="profile.html">Sign In</a></button> -->
+      <input class="get-started" type="submit" value="Sign Up"></input>
+    </div>
+  </form>
   <div class="prompt">
     <p>Don't have an account? <b><a href="signup.html">Sign Up</a></b></p>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
+  <script src="app.js" charset="utf-8"></script>
 </body>
 
 </html>

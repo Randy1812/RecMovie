@@ -1,11 +1,17 @@
+from pprint import pprint
+
 from flask import Flask, render_template, redirect, url_for, request
 from flask_sqlalchemy import SQLAlchemy
+import requests
 from datetime import datetime
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
+TMDB_API_KEY = '7a6f6a890df3e553f8aaf75ec5cf078e'
+RAPIDAPI_KEY = 'cf61825fe6mshaa7ecf5fa25b75bp1c5a42jsn373bd69cfeb3'
 
 
 class User(db.Model):
@@ -167,6 +173,19 @@ def topten():
 
 # *----- Top Ten Path -----*
 
+# *----- Running the Application on the Flask Server -----*
 
-if __name__ == "__main__":
-    app.run(debug=True)
+# if __name__ == "__main__":
+#     app.run(debug=True)
+
+# *----- Running the Application on the Flask Server -----*
+
+# *----- Testing Out Stuff -----*
+
+movie = "Jack Reacher"
+url = f"https://api.themoviedb.org/3/search/movie?api_key={TMDB_API_KEY}&query={movie}"
+response = requests.get(url)
+data = response.json()
+pprint(data)
+
+# *----- Testing Out Stuff -----*

@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Signup</title>
+  <title>Signup & Create Profile</title>
   <link rel="preconnect" href="https://fonts.googleapis.com/%22%3E">
   <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,700,700i|Poppins:300,400,500,700" rel="stylesheet">
@@ -13,17 +13,17 @@
 
 <body>
 
-  <h1 class="sign-heading">SIGN UP</h1>
-  <form action="{{ url_for('validate') }}" method="post">
+  <h1 class="sign-heading">Signup & Create Profile</h1>
+  <form action="{{ url_for('profcrt') }}" method="post" onsubmit="">
     <div class="input">
       <button class="ilab" type="button" name="button" disabled data-bs-toggle="tooltip" data-bs-pacement="top" title="Must only contain alphanumeric characters, underscore and dot.
              Underscore and dot can't be at the end or start of a username (e.g _username / username_ / .username / username.).
              Underscore and dot can't be next to each other (e.g user_.name).
              Underscore or dot can't be used multiple times in a row (e.g user__name / user..name).
              Number of characters must be between 8 to 20.">
-        Name
+        Username
       </button>
-      <input class="ibox" id="name" type="text" name="name" placeholder="ex. John Doe" required>
+      <input class="ibox" id="name" type="text" name="name" placeholder="ex. john_23_doe" required>
     </div>
     <div class="input">
       <button class="ilab" type="button" name="button" disabled data-bs-toggle="tooltip" data-bs-pacement="top" title="Must begin with alpha numeric characters, periods, underscores or hyphens.
@@ -42,11 +42,52 @@
       There must be atleast 1 Special Character.
       There must be atleast 1 Number.">
         Password</button>
-      <input class="ibox" id="password" type="password" name="pwd" placeholder="ex. johnDoe69$" required>
+      <input class="ibox" id="password" type="password" name="pwd" placeholder="ex. johnDoe23$" required>
+    </div>
+    <div class="input">
+      <button class="ilab" type="button" name="button" disabled>
+        Bio
+      </button>
+      <input class="ibox" id="bio" type="text" name="bio" placeholder="One line to describe your taste in movies" required>
+    </div>
+
+    <div class="input">
+      <button class="ilab" type="button" name="button" disabled>
+        Date Of Birth
+      </button>
+      <input class="ibox" id="db" type="date" name="db" required>
+    </div>
+
+    <div class="input">
+      <button class="ilab" type="button" name="button" disabled>
+        Favourite Director
+      </button>
+      <input class="ibox" id="favdir" type="text" name="favdir" placeholder="ex. Christoper Nolan" required>
+    </div>
+
+    <div class="input">
+      <button class="ilab" type="button" name="button" disabled>
+        Favourite Movie
+      </button>
+      <input class="ibox" id="favmov" type="text" name="favmov" placeholder="ex. Prestige" required>
+    </div>
+
+    <div class="input">
+      <button class="ilab" type="button" name="button" disabled>
+        Preferred Language
+      </button>
+      <input class="ibox" id="preflang" type="text" name="preflang" placeholder="ex. English" required>
+    </div>
+
+    <div class="input">
+      <button class="ilab" type="button" name="button" disabled>
+        Preferred Genres
+      </button>
+      <input class="ibox" id="prefgen" type="text" name="prefgen" placeholder="ex. Sci-Fi, Action" required>
     </div>
     <div class="btn">
       <!-- <button class="get-started" type="submit" name="button"><a href="profile.html">Sign Up</a></button> -->
-      <input class="get-started" type="submit" value="Sign Up"></input>
+      <input class="get-started" type="submit" value="Let's Go"></input>
     </div>
   </form>
   <div class="prompt">

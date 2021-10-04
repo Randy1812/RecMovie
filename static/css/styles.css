@@ -115,13 +115,15 @@ button.get-started:hover {
 
 .ilab {
   background-color: #B81D24;
-  width: 185px;
+  width: 200px;
   height: 50px;
   color: #F5F5F1;
   border: none;
   border-radius: 50px;
   font-weight: bold;
   font-size: 1.1rem;
+  padding: 0 8px;
+  margin-right: 10px;
 }
 
 .ibox {

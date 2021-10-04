@@ -67,9 +67,15 @@ def profcrt():
             prflng=preflang,
             prfgen=prefgen
         )
-        db.session.add(new_user)
-        db.session.commit()
-        return redirect(url_for('profile'))
+        already_exists = db.session.query(User.username).filter_by(username=usnm).first() is not None
+        if already_exists:
+            data = ['Uh Oh!!', "This username already exists.", 'Signup Screen', 'signup']
+            return render_template("intermd.html", data=data)
+        else:
+            db.session.add(new_user)
+            db.session.commit()
+            data = ['Success!!', "Your accounht has been created successfully!!", 'Profile', 'profile']
+            return render_template("intermd.html", data=data)
 
 
 # *----- Signup & Profile Creation -----*
@@ -89,7 +95,6 @@ def validate():
     if request.method == "POST":
         usnm = request.form.get('name')
         pswd = request.form.get('pwd')
-        print(usnm, pswd)
         exists = db.session.query(User.username).filter_by(username=usnm).first() is not None
         if exists:
             user_to_verify = User.query.get(usnm)
@@ -106,7 +111,7 @@ def validate():
 
 # *----- Login and validation -----*
 
-
+# *----- Logout Path -----*
 
 @app.route('/logout')
 def logout():
@@ -114,20 +119,18 @@ def logout():
     return render_template("intermd.html", data=data)
 
 
+# *----- Logout Path -----*
+
+# *----- Profile Path -----*
+
 @app.route('/profile')
 def profile():
     return render_template('profile.html')
 
 
-@app.route('/movrec')
-def movrec():
-    return render_template('rec_search.html')
+# *----- Profile Path -----*
 
-
-@app.route('/movrecresult', methods=["GET", "POST"])
-def movrecresult():
-    return render_template("rec_result.html")
-
+# *----- Movie Detail Search Path -----*
 
 @app.route('/movsrc')
 def movsrc():
@@ -139,9 +142,30 @@ def movsrcresult():
     return render_template('movie_det.html')
 
 
+# *----- Movie Detail Search Path -----*
+
+# *----- Movie Recommendation Search Path -----*
+
+@app.route('/movrec')
+def movrec():
+    return render_template('rec_search.html')
+
+
+@app.route('/movrecresult', methods=["GET", "POST"])
+def movrecresult():
+    return render_template("rec_result.html")
+
+
+# *----- Movie Recommendation Search Path -----*
+
+# *----- Top Ten Path -----*
+
 @app.route('/topten')
 def topten():
     return render_template("topten.html")
+
+
+# *----- Top Ten Path -----*
 
 
 if __name__ == "__main__":

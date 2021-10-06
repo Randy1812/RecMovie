@@ -11,9 +11,9 @@
 
   <div class="container h-100 mx-auto">
     <div class="d-flex justify-content-center h-100">
-      <form class="movie-search" action="{{ url_for('movsrcresult') }}" method="post">
+      <form class="movie-search" action="{{ url_for('movsrcresall') }}" method="post">
         <div class="searchbar">
-          <input class="search_input" type="text" name="" placeholder="Search...">
+          <input class="search_input" type="text" name="movname" placeholder="Search...">
           <i class="search_icon fas fa-search fa-lg"></i>
         </div>
       </form>

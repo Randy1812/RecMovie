@@ -142,16 +142,96 @@ def movsrc():
     return render_template('mov_search.html')
 
 
+def get_movies(movname):
+    # Getting the Movie ID from the Movie name
+    movie_id_url = f"https://api.themoviedb.org/3/search/movie?api_key={TMDB_API_KEY}&query={movname}"
+    image_url = "http://image.tmdb.org/t/p/w500"
+    movies = requests.get(f"{movie_id_url}").json()['results'][:5]
+    # pprint(movies)
+    movie_data = []
+    index = 97
+    for movie in movies:
+        new_movie = {
+            'id': movie['id'],
+            'css': chr(index),
+            'title': movie['title'],
+            'backdrop': f"{image_url}{movie['backdrop_path']}",
+            'poster': f"{image_url}{movie['poster_path']}",
+            'year': movie['release_date'].split('-')[0]
+        }
+        movie_data.append(new_movie)
+        index += 1
+    # pprint(movie_data)
+    return movie_data
+
+
 @app.route('/movsrcresall', methods=["GET", "POST"])
 def movsrcresall():
     movname = request.form.get('movname')
-    return render_template('allmovres.html')
+    movies = get_movies(movname)
+    return render_template('allmovres.html', movies=movies)
+
+
+def get_movie_deets(movie_id):
+    # All required API queries
+    image_url = "http://image.tmdb.org/t/p/w500"
+    cast_info_url = f"https://api.themoviedb.org/3/movie/{movie_id}/credits?"
+    movie_data_url = f"https://api.themoviedb.org/3/movie/{movie_id}"
+    mov_dat_params = {
+        "api_key": TMDB_API_KEY,
+        "language": "en-US"
+    }
+
+    # Getting Cast Info and Director
+    director = ""
+    cast_data = []
+    response = requests.get(cast_info_url, params=mov_dat_params).json()
+    cast = response['cast'][:6]
+    crew = response['crew']
+    for i in crew:
+        if i['job'] == "Director":
+            director = i['name']
+            break
+    for i in cast:
+        tmp = {
+            'actor': i['original_name'],
+            'character': i['character'],
+            'img': f"{image_url}{i['profile_path']}"
+        }
+        cast_data.append(tmp)
+
+    # Getting Movie Info
+    response = requests.get(movie_data_url, params=mov_dat_params).json()
+    # pprint(response)
+    genres = []
+    for i in response['genres']:
+        genres.append(i['name'])
+    languages = []
+    for i in response['spoken_languages']:
+        languages.append(i['english_name'])
+    movie_data = {
+        'title': response['original_title'],
+        'overview': response['overview'],
+        'tag': response['tagline'],
+        'runtime': response['runtime'],
+        'rating': response['vote_average'],
+        'year': response['release_date'].split('-')[0],
+        'genres': genres,
+        'language': languages,
+        'poster': f"{image_url}{response['poster_path']}",
+        'backdrop': f"{image_url}{response['backdrop_path']}",
+        'director': director
+    }
+    # pprint(cast_data)
+    # pprint(movie_data)
+    all_data = [cast_data, movie_data]
+    return all_data
 
 
 @app.route('/movsrcresult/<int:movid>', methods=["GET", "POST"])
 def movsrcresult(movid):
-    print(movid)
-    return render_template('movie_det.html')
+    data = get_movie_deets(movid)
+    return render_template('movie_det.html', data=data)
 
 
 # *----- Movie Detail Search Path -----*
@@ -181,42 +261,6 @@ def topten():
 
 # *----- Testing Out Routes -----*
 
-@app.route('/trial')
-def trial():
-    movie = [{'backdrop': 'http://image.tmdb.org/t/p/w500/b09HLFIifMNljI7NI9CJgm2gN1Y.jpg',
-              'css': 'a',
-              'id': 400106,
-              'poster': 'http://image.tmdb.org/t/p/w500/whkT53Sv2vKAUiknQ13pqcWaPXB.jpg',
-              'title': 'Bright',
-              'year': '2017'},
-             {'backdrop': 'http://image.tmdb.org/t/p/w500/tcrNJfyNEIqaBR8Ogkgnq5xQJnf.jpg',
-              'css': 'b',
-              'id': 342470,
-              'poster': 'http://image.tmdb.org/t/p/w500/4SafxuMKQiw4reBiWKVZJpJn80I.jpg',
-              'title': 'All the Bright Places',
-              'year': '2020'},
-             {'backdrop': 'http://image.tmdb.org/t/p/w500/pKfSeodDgNOiK6zZ6k02h5hDljE.jpg',
-              'css': 'c',
-              'id': 39957,
-              'poster': 'http://image.tmdb.org/t/p/w500/eWh8e4Czn0I3HABUyIYHvPs8Nvp.jpg',
-              'title': 'Burning Bright',
-              'year': '2010'},
-             {'backdrop': 'http://image.tmdb.org/t/p/w500/xgLo0sq78OJR2ACBXt6inpoVU2G.jpg',
-              'css': 'd',
-              'id': 29963,
-              'poster': 'http://image.tmdb.org/t/p/w500/ddfiAicb5zs4D2qCtpuJdsalePs.jpg',
-              'title': 'Bright Star',
-              'year': '2009'},
-             {'backdrop': 'http://image.tmdb.org/t/p/w500/gP3fRkvy0ABEorenM76QHKefBOa.jpg',
-              'css': 'e',
-              'id': 15271,
-              'poster': 'http://image.tmdb.org/t/p/w500/m7ik01FJKBSEoy0L0PKz7eEf9kI.jpg',
-              'title': 'Bright Young Things',
-              'year': '2003'}]
-
-    return render_template('allmovres.html', movies=movie)
-
-
 # *----- Testing Out Routes -----*
 
 # *----- Running the Application on the Flask Server -----*
@@ -229,80 +273,5 @@ if __name__ == "__main__":
 
 # *----- Testing Out Functions -----*
 
-# def get_movies(movname):
-#     # Getting the Movie ID from the Movie name
-#     movie_id_url = f"https://api.themoviedb.org/3/search/movie?api_key={TMDB_API_KEY}&query={movname}"
-#     image_url = "http://image.tmdb.org/t/p/w500"
-#     movies = requests.get(f"{movie_id_url}").json()['results'][:5]
-#     # pprint(movies)
-#     movie_data = []
-#     index = 97
-#     for movie in movies:
-#         new_movie = {
-#             'id': movie['id'],
-#             'css': chr(index),
-#             'title': movie['title'],
-#             'backdrop': f"{image_url}{movie['backdrop_path']}",
-#             'poster': f"{image_url}{movie['poster_path']}",
-#             'year': movie['release_date'].split('-')[0]
-#         }
-#         movie_data.append(new_movie)
-#         index += 1
-#     pprint(movie_data)
-#     return movie_data
-#
-#
-# get_movies("bright")
-#
-#
-# def get_movie_deets(movie_id):
-#     # All required API queries
-#     image_url = "http://image.tmdb.org/t/p/w500"
-#     cast_info_url = f"https://api.themoviedb.org/3/movie/{movie_id}/credits?"
-#     movie_data_url = f"https://api.themoviedb.org/3/movie/{movie_id}"
-#     mov_dat_params = {
-#         "api_key": TMDB_API_KEY,
-#         "language": "en-US"
-#     }
-#
-#     # Getting Cast Info and Director
-#     director = ""
-#     cast_data = []
-#     response = requests.get(cast_info_url, params=mov_dat_params).json()
-#     cast = response['cast'][:10]
-#     crew = response['crew']
-#     for i in crew:
-#         if i['job'] == "Director":
-#             director = i['name']
-#             break
-#     for i in cast:
-#         tmp = {
-#             'actor': i['original_name'],
-#             'character': i['character'],
-#             'img': f"{image_url}{i['profile_path']}"
-#         }
-#         cast_data.append(tmp)
-#
-#     # Getting Movie Info
-#     response = requests.get(movie_data_url, params=mov_dat_params).json()
-#     genres = []
-#     for i in response['genres']:
-#         genres.append(i['name'])
-#     movie_data = {
-#         'title': response['original_title'],
-#         'overview': response['overview'],
-#         'tag': response['tagline'],
-#         'runtime': response['runtime'],
-#         'year': response['release_date'].split('-')[0],
-#         'genres': genres,
-#         'poster': f"{image_url}{response['poster_path']}",
-#         'backdrop': f"{image_url}{response['backdrop_path']}",
-#         'director': director
-#     }
-#
-#     pprint(cast_data)
-#     pprint(movie_data)
-#
-# # get_movies("bright")
 
 # *----- Testing Out Stuff -----*

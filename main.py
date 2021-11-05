@@ -30,6 +30,8 @@ class User(db.Model):
 
 db.create_all()
 
+global user
+
 
 # *----- Main Landing Page -----*
 @app.route('/')
@@ -48,6 +50,7 @@ def signup():
 
 @app.route('/profcrt', methods=["GET", "POST"])
 def profcrt():
+    global user
     if request.method == "POST":
         usnm = request.form.get('name')
         eml = request.form.get('email')
@@ -79,8 +82,9 @@ def profcrt():
         else:
             db.session.add(new_user)
             db.session.commit()
-            data = ['Success!!', "Your accounht has been created successfully!!", 'Profile', 'profile']
-            return render_template("intermd.html", data=data)
+            user = new_user
+            data = ['Success!!', "Your account has been created successfully!!", 'Profile', 'profile']
+            return render_template("intermd.html", data=data, user=new_user)
 
 
 # *----- Signup & Profile Creation -----*
@@ -95,6 +99,7 @@ def login():
 
 @app.route('/validate', methods=["GET", "POST"])
 def validate():
+    global user
     if request.method == "GET":
         return redirect(url_for("profile"))
     if request.method == "POST":
@@ -104,8 +109,9 @@ def validate():
         if exists:
             user_to_verify = User.query.get(usnm)
             if (usnm == user_to_verify.username) and (pswd == user_to_verify.pswd):
+                user = user_to_verify
                 data = ['Success!!', "You have been logged in successfully!!", 'Continue', 'profile']
-                return render_template("intermd.html", data=data)
+                return render_template("intermd.html", data=data, user=user_to_verify)
             else:
                 data = ['Oops!!', "Your Username and Password Do Not Match", 'Login Screen', 'login']
                 return render_template("intermd.html", data=data)
@@ -130,7 +136,21 @@ def logout():
 
 @app.route('/profile')
 def profile():
-    return render_template('profile.html')
+    global user
+    y = datetime.strptime(user.dbrth, "%d %b, %Y").year
+    m = datetime.strptime(user.dbrth, "%d %b, %Y").month
+    d = datetime.strptime(user.dbrth, "%d %b, %Y").day
+    yc = datetime.now().year
+    mc = datetime.now().month
+    dc = datetime.now().day
+    age = yc - y - 1
+    if mc > m:
+        age += 1
+    elif mc == m:
+        if dc >= d:
+            age += 1
+    print(y,m,d,yc,mc,dc,age)
+    return render_template('profile.html', user_data=user, age=age)
 
 
 # *----- Profile Path -----*

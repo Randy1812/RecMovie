@@ -360,7 +360,7 @@ button.see-more {
     margin-top: 30px;
     width:140px;
 }
-.card {
+.card1 {
   width: 200px;
   height: 250px;
   border-radius: 20px;
@@ -370,7 +370,7 @@ button.see-more {
   transition: 0.4s;
 }
 
-.card:hover {
+.card1:hover {
     transform: scale(2);
     transition: 0.4s;
     z-index: 3;

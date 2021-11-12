@@ -19,7 +19,7 @@
                 <div class="movie_header">
                     <h1>{{ movie.title }}</h1>
                     <h4>{{ movie['year'] }}</h4>
-                    <button class="see-more"><a href="{{ url_for('movsrcresult', movid=movie['id']) }}">More</a></button>
+                    <button class="see-more"><a href="{{ url_for(goto, movid=movie['id']) }}">More</a></button>
                 </div>
             </div>
             <div class="blur_back {{ movie['css'] }}"></div>

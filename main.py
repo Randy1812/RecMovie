@@ -7,7 +7,7 @@ from datetime import datetime
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
+db = SQLAlchemy(app, session_options={"expire_on_commit": False})
 
 TMDB_API_KEY = '7a6f6a890df3e553f8aaf75ec5cf078e'
 RAPIDAPI_KEY = 'cf61825fe6mshaa7ecf5fa25b75bp1c5a42jsn373bd69cfeb3'
@@ -18,6 +18,7 @@ class User(db.Model):
     eml = db.Column(db.String(100), nullable=False)
     pswd = db.Column(db.String(100), nullable=False)
     bio = db.Column(db.String(100), nullable=False)
+    djoin = db.Column(db.String(100), nullable=False)
     dbrth = db.Column(db.String(100), nullable=False)
     fvdir = db.Column(db.String(100), nullable=False)
     fvmov = db.Column(db.String(100), nullable=False)
@@ -31,6 +32,12 @@ class User(db.Model):
 db.create_all()
 
 global user
+
+
+# *----- Testing Out Stuff -----*
+
+
+# *----- Testing Out Stuff -----*
 
 
 # *----- Main Landing Page -----*
@@ -58,6 +65,7 @@ def profcrt():
         dbr = request.form.get('db')
         dob = datetime.strptime(dbr, "%Y-%m-%d")
         dobst = dob.strftime("%d %b, %Y")
+        djn = datetime.now().strftime("%d %b, %Y")
         bio = request.form.get('bio')
         favdir = request.form.get('favdir')
         favmov = request.form.get('favmov')
@@ -69,6 +77,7 @@ def profcrt():
             eml=eml,
             pswd=pswd,
             bio=bio,
+            djoin=djn,
             dbrth=dobst,
             fvdir=favdir,
             fvmov=favmov,
@@ -84,7 +93,7 @@ def profcrt():
             db.session.commit()
             user = new_user
             data = ['Success!!', "Your account has been created successfully!!", 'Profile', 'profile']
-            return render_template("intermd.html", data=data, user=new_user)
+            return render_template("intermd.html", data=data)
 
 
 # *----- Signup & Profile Creation -----*
@@ -111,7 +120,7 @@ def validate():
             if (usnm == user_to_verify.username) and (pswd == user_to_verify.pswd):
                 user = user_to_verify
                 data = ['Success!!', "You have been logged in successfully!!", 'Continue', 'profile']
-                return render_template("intermd.html", data=data, user=user_to_verify)
+                return render_template("intermd.html", data=data)
             else:
                 data = ['Oops!!', "Your Username and Password Do Not Match", 'Login Screen', 'login']
                 return render_template("intermd.html", data=data)
@@ -149,7 +158,7 @@ def profile():
     elif mc == m:
         if dc >= d:
             age += 1
-    print(y,m,d,yc,mc,dc,age)
+    print(y, m, d, yc, mc, dc, age)
     return render_template('profile.html', user_data=user, age=age)
 
 
@@ -166,7 +175,11 @@ def get_movies(movname):
     # Getting the Movie ID from the Movie name
     movie_id_url = f"https://api.themoviedb.org/3/search/movie?api_key={TMDB_API_KEY}&query={movname}"
     image_url = "http://image.tmdb.org/t/p/w500"
-    movies = requests.get(f"{movie_id_url}").json()['results'][:5]
+    data = requests.get(f"{movie_id_url}").json()['results']
+    if len(data) > 5:
+        movies = data[:5]
+    else:
+        movies = data
     # pprint(movies)
     movie_data = []
     index = 97
@@ -177,7 +190,7 @@ def get_movies(movname):
             'title': movie['title'],
             'backdrop': f"{image_url}{movie['backdrop_path']}",
             'poster': f"{image_url}{movie['poster_path']}",
-            'year': movie['release_date'].split('-')[0]
+            'year': movie['release_date'].split('-')[0] if movie['release_date'].split('-') else "Not Available"
         }
         movie_data.append(new_movie)
         index += 1
@@ -189,7 +202,7 @@ def get_movies(movname):
 def movsrcresall():
     movname = request.form.get('movname')
     movies = get_movies(movname)
-    return render_template('allmovres.html', movies=movies)
+    return render_template('allmovres.html', movies=movies, goto="movsrcresult")
 
 
 def get_movie_deets(movie_id):
@@ -263,9 +276,46 @@ def movrec():
     return render_template('rec_search.html')
 
 
-@app.route('/movrecresult', methods=["GET", "POST"])
-def movrecresult():
-    return render_template("rec_result.html")
+@app.route('/movrecsrcall', methods=['GET', 'POST'])
+def movrecsrcall():
+    movname = request.form.get('movname')
+    movies = get_movies(movname)
+    return render_template('allmovres.html', movies=movies, goto="movrecresult")
+
+
+def get_movie_recs(movie_id):
+    image_url = "http://image.tmdb.org/t/p/w500"
+    movie_rec_url = f"https://api.themoviedb.org/3/movie/{movie_id}/recommendations?"
+    mov_dat_params = {
+        "api_key": TMDB_API_KEY,
+        "language": "en-US"
+    }
+    response = requests.get(movie_rec_url, params=mov_dat_params).json()
+    all_data = response['results']
+    rec_data = []
+    for movie in all_data:
+        temp = {
+            "poster": f"{image_url}/{movie['poster_path']}",
+            "title": movie["title"],
+            "id": movie["id"],
+            "overview": movie['overview']
+        }
+        rec_data.append(temp)
+    # pprint(rec_data)
+    # print(len(rec_data))
+    return rec_data
+
+
+@app.route('/movrecresult/<int:movid>', methods=["GET", "POST"])
+def movrecresult(movid):
+    mov_data = get_movie_recs(movid)
+    return render_template("rec_result.html", mov_data=mov_data)
+
+
+@app.route('/movrecfin/<int:movid>')
+def movrecfin(movid):
+    data = get_movie_deets(movid)
+    return render_template("movie_det.html", data=data)
 
 
 # *----- Movie Recommendation Search Path -----*
@@ -279,19 +329,12 @@ def topten():
 
 # *----- Top Ten Path -----*
 
-# *----- Testing Out Routes -----*
-
-# *----- Testing Out Routes -----*
 
 # *----- Running the Application on the Flask Server -----*
+
 
 if __name__ == "__main__":
     app.run(debug=True)
 
 # *----- Running the Application on the Flask Server -----*
 
-
-# *----- Testing Out Functions -----*
-
-
-# *----- Testing Out Stuff -----*

@@ -1,16 +1,24 @@
 from pprint import pprint
 from flask import Flask, render_template, redirect, url_for, request
 from flask_sqlalchemy import SQLAlchemy
+from flask_bootstrap import Bootstrap
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField, FloatField
+from wtforms.validators import DataRequired, NumberRange
 import requests
 from datetime import datetime
+from dotenv import dotenv_values
+
+config = dotenv_values(".env")
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = config['SECRET_KEY']
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+Bootstrap(app)
 db = SQLAlchemy(app, session_options={"expire_on_commit": False})
 
-TMDB_API_KEY = '7a6f6a890df3e553f8aaf75ec5cf078e'
-RAPIDAPI_KEY = 'cf61825fe6mshaa7ecf5fa25b75bp1c5a42jsn373bd69cfeb3'
+TMDB_API_KEY = config['TMDB_API_KEY']
 
 
 class User(db.Model):
@@ -27,6 +35,21 @@ class User(db.Model):
 
     def __repr__(self):
         return f'<User {self.username}>'
+
+
+class TopMovie(db.Model):
+    username = db.Column(db.String(100), primary_key=True, nullable=False)
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    title = db.Column(db.String(100), nullable=False, unique=True)
+    year = db.Column(db.Integer(), nullable=False)
+    tag = db.Column(db.String(500), nullable=False)
+    rating = db.Column(db.Float(), nullable=True)
+    ranking = db.Column(db.Integer(), nullable=True)
+    review = db.Column(db.String(500), nullable=True)
+    img_url = db.Column(db.String(500), nullable=False)
+
+    def __repr__(self):
+        return f'<Movie {self.title}>'
 
 
 db.create_all()
@@ -324,7 +347,77 @@ def movrecfin(movid):
 
 @app.route('/topten')
 def topten():
-    return render_template("topten.html")
+    global user
+    print(user.username)
+    movies = TopMovie.query.filter_by(username=user.username).order_by(TopMovie.rating.desc()).all()
+    for i in range(len(movies)):
+        movies[i].ranking = i + 1
+    db.session.commit()
+    return render_template("topten.html", movies=movies)
+
+
+@app.route('/toptenedit/<int:movid>', methods=['GET', 'POST'])
+def toptenedit(movid):
+    global user
+    if request.method == 'GET':
+        return render_template('tpaddm.html', movid=movid, goto="toptenedit")
+    else:
+        rating = request.form.get('rating')
+        review = request.form.get('review')
+        upd_mov = TopMovie.query.get((user.username, movid))
+        upd_mov.review = review
+        upd_mov.rating = rating
+        db.session.commit()
+        return redirect(url_for('topten'))
+
+
+@app.route('/toptenremove/<int:movid>')
+def toptenremove(movid):
+    global user
+    movie = TopMovie.query.get((user.username, movid))
+    print(movie)
+    db.session.delete(movie)
+    db.session.commit()
+    return redirect(url_for('topten'))
+
+
+@app.route('/toptenadd', methods=['GET', 'POST'])
+def toptenadd():
+    return render_template("top_search.html")
+
+
+@app.route('/toptenresall', methods=['GET', 'POST'])
+def toptenresall():
+    movname = request.form.get('movname')
+    movies = get_movies(movname)
+    return render_template('allmovres.html', movies=movies, goto="toptenfin")
+
+
+@app.route('/toptenfin/<int:movid>')
+def toptenfin(movid):
+    return render_template('tpaddm.html', movid=movid, goto="addtodb")
+
+
+@app.route('/addtodb/<int:movid>', methods=['GET', 'POST'])
+def addtodb(movid):
+    global user
+    rating = request.form.get('rating')
+    review = request.form.get('review')
+    movie_det = get_movie_deets(movid)
+    print(movie_det[1])
+    new_movie = TopMovie(
+        username=user.username,
+        id=movid,
+        title=movie_det[1]['title'],
+        year=movie_det[1]['year'],
+        tag=movie_det[1]['tag'],
+        rating=rating,
+        review=review,
+        img_url=movie_det[1]['poster']
+    )
+    db.session.add(new_movie)
+    db.session.commit()
+    return redirect(url_for('topten'))
 
 
 # *----- Top Ten Path -----*
@@ -337,4 +430,3 @@ if __name__ == "__main__":
     app.run(debug=True)
 
 # *----- Running the Application on the Flask Server -----*
-
